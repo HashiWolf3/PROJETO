@@ -1,0 +1,461 @@
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.List;
+
+public class Tela {
+
+    private Model model;
+    private JFrame frame;
+    private JPanel telaPrincipal;
+
+    public Tela(Model model) {
+        this.model = model;
+        frame = new JFrame("Sistema de Atendimento");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(600, 400);
+        frame.setLocationRelativeTo(null);  // Centraliza a tela principal na tela
+        criarTelaInicial();
+    }
+
+    public void criarTelaInicial() {
+        if (telaPrincipal != null) {
+            return;
+        }
+
+        telaPrincipal = new JPanel(new GridLayout(2, 2));
+
+        JButton btnCadastrar = new JButton("Cadastrar Cliente");
+        JButton btnRegistro = new JButton("Registro de Atendimento");
+        JButton btnAtualizar = new JButton("Atualizar Cliente");
+        JButton btnFeedback = new JButton("Feedback de Atendimento");
+
+        telaPrincipal.add(btnCadastrar);
+        telaPrincipal.add(btnRegistro);
+        telaPrincipal.add(btnAtualizar);
+        telaPrincipal.add(btnFeedback);
+
+        frame.add(telaPrincipal, BorderLayout.CENTER);
+        frame.setVisible(true);
+
+        btnCadastrar.addActionListener(e -> criarJanelaCadastroCliente());
+        btnRegistro.addActionListener(e -> criarJanelaRegistroAtendimento());
+        btnAtualizar.addActionListener(e -> criarJanelaAtualizarCliente());
+        btnFeedback.addActionListener(e -> criarJanelaFeedback());
+        
+    }
+
+    public void criarJanelaCadastroCliente() {
+        JFrame janelaCadastro = new JFrame("Cadastro de Cliente");
+        janelaCadastro.setSize(400, 300);
+        janelaCadastro.setLayout(new BorderLayout());
+        janelaCadastro.setLocationRelativeTo(null);
+
+        JPanel formPanel = new JPanel(new GridLayout(7, 2, 5, 5));
+        JTextField nomeField = new JTextField();
+        JTextField emailField = new JTextField();
+        JTextField telefoneField = new JTextField();
+        JTextField cepField = new JTextField();
+        JTextField ruaField = new JTextField();
+        JTextField numeroField = new JTextField();
+        JTextField cidadeField = new JTextField();
+
+        formPanel.add(new JLabel("Nome:"));
+        formPanel.add(nomeField);
+        formPanel.add(new JLabel("Email:"));
+        formPanel.add(emailField);
+        formPanel.add(new JLabel("Telefone:"));
+        formPanel.add(telefoneField);
+        formPanel.add(new JLabel("CEP:"));
+        formPanel.add(cepField);
+        formPanel.add(new JLabel("Rua:"));
+        formPanel.add(ruaField);
+        formPanel.add(new JLabel("Número:"));
+        formPanel.add(numeroField);
+        formPanel.add(new JLabel("Cidade:"));
+        formPanel.add(cidadeField);
+
+        janelaCadastro.add(formPanel, BorderLayout.CENTER);
+
+        JPanel botoesPanel = new JPanel();
+        JButton btnVoltar = new JButton("Voltar");
+        JButton btnCadastrar = new JButton("Cadastrar");
+
+        btnVoltar.addActionListener(e -> janelaCadastro.dispose());
+        btnCadastrar.addActionListener(e -> {
+            String nome = nomeField.getText();
+            String email = emailField.getText();
+            String telefone = telefoneField.getText();
+            String cep = cepField.getText();
+            String rua = ruaField.getText();
+            String numero = numeroField.getText();
+            String cidade = cidadeField.getText();
+
+            if (nome.isEmpty() || email.isEmpty()) {
+                JOptionPane.showMessageDialog(janelaCadastro, "Nome e Email são obrigatórios.");
+            } else {
+                model.adicionarCliente(nome, email, telefone, cep, rua, numero, cidade);
+                model.registrarDados(nome, email, telefone, cep, rua, numero, cidade);
+                JOptionPane.showMessageDialog(janelaCadastro, "Cliente cadastrado com sucesso!");
+                janelaCadastro.dispose();
+            }
+        });
+
+        botoesPanel.add(btnVoltar);
+        botoesPanel.add(btnCadastrar);
+        janelaCadastro.add(botoesPanel, BorderLayout.SOUTH);
+
+        janelaCadastro.setVisible(true);
+    }
+
+    public void criarJanelaRegistroAtendimento() {
+        JFrame janelaRegistro = new JFrame("Registro de Atendimento");
+        janelaRegistro.setSize(400, 400);
+        janelaRegistro.setLocationRelativeTo(null);
+
+        List<String> clientes = model.getClientes(); // Obtém a lista de clientes do model
+        JPanel panelClientes = new JPanel();
+        panelClientes.setLayout(new BoxLayout(panelClientes, BoxLayout.Y_AXIS));
+        JScrollPane scrollPane = new JScrollPane(panelClientes);
+        janelaRegistro.add(scrollPane, BorderLayout.CENTER);
+
+        for (String cliente : clientes) {
+            JPanel panelCliente = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            JLabel lblNome = new JLabel(cliente);
+            JButton btnEscolher = new JButton("Escolher");
+
+            btnEscolher.addActionListener(e -> {
+                abrirTelaAtendimento(cliente);
+                janelaRegistro.dispose();
+                });
+            janelaRegistro.dispose();
+            panelCliente.add(lblNome);
+            panelCliente.add(btnEscolher);
+            panelClientes.add(panelCliente);
+        }
+
+        JButton btnVoltar = new JButton("Voltar");
+        btnVoltar.addActionListener(e -> janelaRegistro.dispose());
+        janelaRegistro.add(btnVoltar, BorderLayout.SOUTH);
+
+        janelaRegistro.setVisible(true);
+    }
+
+    private void abrirTelaAtendimento(String cliente) {
+        JFrame janelaAtendimento = new JFrame("Atendimento - " + cliente);
+        janelaAtendimento.setSize(400, 300);
+        janelaAtendimento.setLocationRelativeTo(null);
+
+        JPanel formPanel = new JPanel(new GridLayout(3, 2, 5, 5));
+        JTextField assuntoField = new JTextField();
+        JTextField dataField = new JTextField();
+        JComboBox<String> statusCombo = new JComboBox<>(new String[]{"Pendente", "Concluída"});
+
+        // Carregar dados existentes, se houver
+        Model.Atendimento atendimentoExistente = model.getAtendimento(cliente);
+        if (atendimentoExistente != null) {
+            assuntoField.setText(atendimentoExistente.getAssunto());
+            dataField.setText(atendimentoExistente.getData());
+            statusCombo.setSelectedItem(atendimentoExistente.getStatus());
+        }
+
+        formPanel.add(new JLabel("Assunto:"));
+        formPanel.add(assuntoField);
+        formPanel.add(new JLabel("Data:"));
+        formPanel.add(dataField);
+        formPanel.add(new JLabel("Status:"));
+        formPanel.add(statusCombo);
+
+        janelaAtendimento.add(formPanel, BorderLayout.CENTER);
+
+        JPanel botoesPanel = new JPanel();
+        JButton btnVoltar = new JButton("Voltar");
+        JButton btnConcluir = new JButton("Concluir");
+
+        btnVoltar.addActionListener(e -> janelaAtendimento.dispose());
+        btnConcluir.addActionListener(e -> {
+            String assunto = assuntoField.getText();
+            String data = dataField.getText();
+            String status = (String) statusCombo.getSelectedItem();
+
+            model.registrarAtendimento(cliente, assunto, data, status);
+            JOptionPane.showMessageDialog(janelaAtendimento, "Atendimento registrado com sucesso!");
+            janelaAtendimento.dispose();
+        });
+
+        botoesPanel.add(btnVoltar);
+        botoesPanel.add(btnConcluir);
+        janelaAtendimento.add(botoesPanel, BorderLayout.SOUTH);
+
+        janelaAtendimento.setVisible(true);
+    }
+
+    public void criarJanelaAtualizarCliente() {
+        JFrame janelaRegistro = new JFrame("Atualizar Cliente");
+        janelaRegistro.setSize(400, 400);
+        janelaRegistro.setLocationRelativeTo(null);
+
+        List<String> clientes = model.getClientes(); // Obtém a lista de clientes do model
+        JPanel panelClientes = new JPanel();
+        panelClientes.setLayout(new BoxLayout(panelClientes, BoxLayout.Y_AXIS));
+        JScrollPane scrollPane = new JScrollPane(panelClientes);
+        janelaRegistro.add(scrollPane, BorderLayout.CENTER);
+
+        for (String cliente : clientes) {
+            JPanel panelCliente = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            JLabel lblNome = new JLabel(cliente);
+            JButton btnEscolher = new JButton("Escolher");
+
+            btnEscolher.addActionListener(e -> {
+                abrirOpcoesAtualizacao(cliente);
+                janelaRegistro.dispose();
+                });
+
+            panelCliente.add(lblNome);
+            panelCliente.add(btnEscolher);
+            panelClientes.add(panelCliente);
+        }
+
+        JButton btnVoltar = new JButton("Voltar");
+        btnVoltar.addActionListener(e -> janelaRegistro.dispose());
+        janelaRegistro.add(btnVoltar, BorderLayout.SOUTH);
+
+        janelaRegistro.setVisible(true);
+    }
+
+
+    private void abrirOpcoesAtualizacao(String cliente) {
+        JFrame janelaOpcoes = new JFrame("Escolha a opção de atualização");
+        janelaOpcoes.setSize(400, 200);
+        janelaOpcoes.setLocationRelativeTo(null);
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(3, 1));
+
+        JButton btnAtualizarCadastro = new JButton("Atualizar Cadastro");
+        JButton btnAtualizarAtendimento = new JButton("Atualizar Atendimento");
+        JButton btnExcluirCliente = new JButton("Excluir Cliente");
+        
+        btnAtualizarCadastro.addActionListener(e -> {
+            abrirTelaCadastro(cliente, true);
+            janelaOpcoes.dispose();
+        });
+        btnAtualizarAtendimento.addActionListener(e -> {
+            abrirTelaAtendimento(cliente); 
+            janelaOpcoes.dispose();
+        });
+        btnExcluirCliente.addActionListener(e -> {
+            int resposta = JOptionPane.showConfirmDialog(janelaOpcoes, "Tem certeza que deseja excluir este cliente?", "Confirmação", JOptionPane.YES_NO_OPTION);
+            if (resposta == JOptionPane.YES_OPTION) {
+                model.getClientes().remove(cliente); 
+                JOptionPane.showMessageDialog(janelaOpcoes, "Cliente excluído com sucesso.");
+                janelaOpcoes.dispose();
+            }
+        });
+
+        panel.add(btnAtualizarCadastro);
+        panel.add(btnAtualizarAtendimento);
+        panel.add(btnExcluirCliente);
+        janelaOpcoes.add(panel);
+        janelaOpcoes.setVisible(true);
+    }
+
+    private void abrirTelaCadastro(String cliente, boolean atualizar) {
+        JFrame janelaCadastro = new JFrame((atualizar ? "Atualizar Cadastro - " : "Cadastrar Cliente - ") + cliente);
+        janelaCadastro.setSize(400, 300);
+        janelaCadastro.setLocationRelativeTo(null);
+
+        JPanel formPanel = new JPanel(new GridLayout(7, 2, 5, 5));
+        Model.Dado dadoExistente = model.getDado(cliente); 
+        
+        JTextField nomeField = new JTextField(cliente);
+        nomeField.setEditable(false);
+        JTextField emailField = new JTextField();
+        JTextField telefoneField = new JTextField();
+        JTextField cepField = new JTextField();
+        JTextField ruaField = new JTextField();
+        JTextField numeroField = new JTextField();
+        JTextField cidadeField = new JTextField();
+        
+        // Se for atualização, carregue os dados do cliente
+        if (atualizar) {
+        emailField.setText(dadoExistente.getEmail());
+        telefoneField.setText(dadoExistente.getTelefone());
+        cepField.setText(dadoExistente.getCep());
+        ruaField.setText(dadoExistente.getRua());
+        numeroField.setText(dadoExistente.getNumero());
+        cidadeField.setText(dadoExistente.getCidade());
+
+        }
+       
+        formPanel.add(new JLabel("Nome:"));
+        formPanel.add(nomeField);
+        formPanel.add(new JLabel("Email:"));
+        formPanel.add(emailField);
+        formPanel.add(new JLabel("Telefone:"));
+        formPanel.add(telefoneField);
+        formPanel.add(new JLabel("CEP:"));
+        formPanel.add(cepField);
+        formPanel.add(new JLabel("Rua:"));
+        formPanel.add(ruaField);
+        formPanel.add(new JLabel("Número:"));
+        formPanel.add(numeroField);
+        formPanel.add(new JLabel("Cidade:"));
+        formPanel.add(cidadeField);
+        
+        janelaCadastro.add(formPanel, BorderLayout.CENTER);
+
+        JPanel botoesPanel = new JPanel();
+        JButton btnVoltar = new JButton("Voltar");
+        JButton btnCadastrarAtualizar = new JButton(atualizar ? "Atualizar" : "Cadastrar");
+
+        btnVoltar.addActionListener(e -> janelaCadastro.dispose());
+        btnCadastrarAtualizar.addActionListener(e -> {
+            if (atualizar) {
+                // Atualizar os dados do cliente com os novos dados fornecidos
+                model.registrarDados(nomeField.getText(), emailField.getText(), telefoneField.getText(), cepField.getText(), ruaField.getText(), numeroField.getText(), cidadeField.getText());
+                JOptionPane.showMessageDialog(janelaCadastro, "Cadastro do cliente atualizado com sucesso!");
+           
+            } else {
+                // Registrar um novo cliente
+                model.adicionarCliente(nomeField.getText(), emailField.getText(), telefoneField.getText(), cepField.getText(), ruaField.getText(), numeroField.getText(), cidadeField.getText());
+                JOptionPane.showMessageDialog(janelaCadastro, "Cliente cadastrado com sucesso!");
+            }
+            janelaCadastro.dispose();
+        });
+
+        botoesPanel.add(btnVoltar);
+        botoesPanel.add(btnCadastrarAtualizar);
+        janelaCadastro.add(botoesPanel, BorderLayout.SOUTH);
+
+        janelaCadastro.setVisible(true);
+    }
+    
+    public void criarJanelaFeedback() {
+        JFrame janelaRegistro = new JFrame("Dar Feedback");
+        janelaRegistro.setSize(400, 400);
+        janelaRegistro.setLocationRelativeTo(null);
+
+        List<String> clientes = model.getClientes(); // Obtém a lista de clientes do model
+        JPanel panelClientes = new JPanel();
+        panelClientes.setLayout(new BoxLayout(panelClientes, BoxLayout.Y_AXIS));
+        JScrollPane scrollPane = new JScrollPane(panelClientes);
+        janelaRegistro.add(scrollPane, BorderLayout.CENTER);
+
+        for (String cliente : clientes) {
+            JPanel panelCliente = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            JLabel lblNome = new JLabel(cliente);
+            JButton btnEscolher = new JButton("Escolher");
+
+            btnEscolher.addActionListener(e -> {
+                abrirTelaFeedback(cliente);
+                janelaRegistro.dispose();
+                });
+
+            panelCliente.add(lblNome);
+            panelCliente.add(btnEscolher);
+            panelClientes.add(panelCliente);
+        }
+
+        JButton btnVoltar = new JButton("Voltar");
+        btnVoltar.addActionListener(e -> janelaRegistro.dispose());
+        janelaRegistro.add(btnVoltar, BorderLayout.SOUTH);
+
+        janelaRegistro.setVisible(true);
+    }
+    
+    
+    public static void abrirTelaFeedback(String cliente) {
+        
+        JFrame janelaFeedback = new JFrame("Feedback do Cliente");
+        janelaFeedback.setSize(500, 400);
+        janelaFeedback.setLocationRelativeTo(null);
+        
+        
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(3, 2));
+        
+        
+        panel.add(new JLabel("Comentário:"));
+        JTextArea comentarioArea = new JTextArea(5, 30);
+        panel.add(new JScrollPane(comentarioArea));
+        
+        
+        panel.add(new JLabel("Nota:"));
+        JPanel notaPanel = new JPanel();
+        notaPanel.setLayout(new FlowLayout());  // Layout para os botões de nota
+
+        // Criando 5 botões de nota
+        JButton btnNota1 = new JButton("1");
+        JButton btnNota2 = new JButton("2");
+        JButton btnNota3 = new JButton("3");
+        JButton btnNota4 = new JButton("4");
+        JButton btnNota5 = new JButton("5");
+
+        // Atribuindo cores aos botões
+        btnNota1.setBackground(Color.GRAY);
+        btnNota2.setBackground(Color.GRAY);
+        btnNota3.setBackground(Color.GRAY);
+        btnNota4.setBackground(Color.GRAY);
+        btnNota5.setBackground(Color.GRAY);
+
+        // Alterando a cor do botão selecionado
+        ActionListener notaListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JButton source = (JButton) e.getSource();
+               int notaSelecionada = Integer.parseInt(source.getText());
+                
+                // Resetando as cores
+                btnNota1.setBackground(Color.GRAY);
+                btnNota2.setBackground(Color.GRAY);
+                btnNota3.setBackground(Color.GRAY);
+                btnNota4.setBackground(Color.GRAY);
+                btnNota5.setBackground(Color.GRAY);
+                
+                // Alterando a cor do botão selecionado
+                if (notaSelecionada == 1) btnNota1.setBackground(Color.RED);
+                else if (notaSelecionada == 2) btnNota2.setBackground(Color.ORANGE);
+                else if (notaSelecionada == 3) btnNota3.setBackground(Color.ORANGE);
+                else if (notaSelecionada == 4) btnNota4.setBackground(Color.ORANGE);
+                else if (notaSelecionada == 5) btnNota5.setBackground(Color.GREEN);
+            }
+        };
+
+
+        btnNota1.addActionListener(notaListener);
+        btnNota2.addActionListener(notaListener);
+        btnNota3.addActionListener(notaListener);
+        btnNota4.addActionListener(notaListener);
+        btnNota5.addActionListener(notaListener);
+
+
+        notaPanel.add(btnNota1);
+        notaPanel.add(btnNota2);
+        notaPanel.add(btnNota3);
+        notaPanel.add(btnNota4);
+        notaPanel.add(btnNota5);
+
+        panel.add(notaPanel);
+        
+        JButton btnConcluir = new JButton("Concluir");
+        btnConcluir.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                
+                String comentario = comentarioArea.getText();   
+                JOptionPane.showMessageDialog(janelaFeedback, "Feedback salvo com sucesso!");
+                
+                janelaFeedback.dispose();
+            }
+        });
+        
+        
+        panel.add(btnConcluir, BorderLayout.SOUTH);
+        janelaFeedback.add(panel);
+        janelaFeedback.setVisible(true);
+    }
+}
+
