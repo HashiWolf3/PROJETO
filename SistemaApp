@@ -1,0 +1,15 @@
+import javax.swing.*;
+
+public class SistemaApp {
+    public static void main(String[] args) {
+        // Utiliza a thread da interface gráfica para iniciar o programa
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                Model model = new Model(); // Cria uma instância da classe Model para armazenar dados
+                Tela tela = new Tela(model); // Passa o model para a tela
+                tela.criarTelaInicial(); // Chama a tela inicial
+            }
+        });
+    }
+}
