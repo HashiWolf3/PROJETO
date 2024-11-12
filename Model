@@ -1,0 +1,119 @@
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class Model {
+    
+    private List<String> clientes = new ArrayList<>();
+    private Map<String, Atendimento> atendimentos = new HashMap<>();
+    private Map<String, Dado> dados = new HashMap<>();
+    private Map<String, Feedback> feedbacks = new HashMap<>();
+
+public void adicionarCliente(String nome, String email, String telefone, String cep, String rua, String numero, String cidade) {
+    for (int i = 0; i < clientes.size(); i++) {
+        if (clientes.get(i).equals(nome)) {
+            return;
+        }
+    }
+    clientes.add(nome);
+}
+
+
+    public List<String> getClientes() {
+        return clientes;
+    }
+    public void registrarDados(String cliente, String email, String telefone, String cep, String rua, String numero, String cidade) {
+        dados.put(cliente, new Dado(email, telefone, cep, rua, numero, cidade));
+    }
+    public Dado getDado(String cliente) {
+        return dados.get(cliente);
+    }
+    class Dado {
+        String email, telefone, cep, rua, numero, cidade;
+        
+        Dado(String email, String telefone, String cep, String rua, String numero, String cidade){
+            this.email = email;
+            this.telefone = telefone;
+            this.cep = cep;
+            this.rua = rua;
+            this.numero = numero;
+            this.cidade = cidade;
+        }
+        public String getEmail() {
+            return email;
+        }
+
+        public String getTelefone() {
+            return telefone;
+        }
+
+        public String getCep() {
+            return cep;
+        }
+        public String getRua() {
+            return rua;
+        }
+        public String getNumero() {
+            return numero;         
+        }
+        public String getCidade() {
+            return cidade;
+        }
+    }
+    public void registrarAtendimento(String cliente, String assunto, String data, String status) {
+        atendimentos.put(cliente, new Atendimento(assunto, data, status));
+    }
+
+    public Atendimento getAtendimento(String cliente) {
+        return atendimentos.get(cliente);
+    }
+
+    class Atendimento {
+        String assunto, data, status;
+
+        Atendimento(String assunto, String data, String status) {
+            this.assunto = assunto;
+            this.data = data;
+            this.status = status;
+        }
+
+        public String getAssunto() {
+            return assunto;
+        }
+
+        public String getData() {
+            return data;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+    }
+    
+    public void registrarFeedback(String cliente, String comentario, int nota) {
+        feedbacks.put(cliente, new Feedback(comentario, nota));
+    
+
+    public Feedback getFeedback(String cliente) {
+        return feedbacks.get(cliente);
+    }
+    
+    class Feedback {
+        String comentario;
+        int nota;
+        
+        Feedback(String comentario, int nota){
+            this.comentario = comentario;
+            this.nota = nota;
+        }
+        
+        public String getComentario() {
+            return comentario;
+        }
+        public int getNota() {
+            return nota;
+        }
+    }
+    
+}
