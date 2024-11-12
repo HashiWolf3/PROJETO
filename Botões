@@ -1,0 +1,25 @@
+public class Botões {
+    private Tela tela;
+    private Model model;
+
+    public Botões(Tela tela, Model model) {
+        this.tela = tela;
+        this.model = model;
+    }
+
+    public void acaoCadastrarCliente() {
+        tela.criarJanelaCadastroCliente(); 
+    }
+
+   public void acaoRegistroAtendimento() {
+        tela.criarJanelaRegistroAtendimento(); 
+    }
+
+    public void acaoAtualizarCliente() {
+        tela.criarJanelaAtualizarCliente(); 
+}
+
+    public void acaoFeedbackAtendimento() {
+        tela.criarJanelaFeedback(); 
+    }
+}
