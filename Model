@@ -93,7 +93,7 @@ public void adicionarCliente(String nome, String email, String telefone, String 
     
     public void registrarFeedback(String cliente, String comentario, int nota) {
         feedbacks.put(cliente, new Feedback(comentario, nota));
-    
+    }
 
     public Feedback getFeedback(String cliente) {
         return feedbacks.get(cliente);
